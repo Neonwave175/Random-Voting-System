@@ -1,0 +1,12 @@
+{
+  "name": "secure-voting-system",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "keys": "node generate-keys.js",
+    "tokens": "node generate-tokens.js",
+    "build": "node build-ballot.js",
+    "read": "node reader.js",
+    "results": "node reader.js --results"
+  }
+}

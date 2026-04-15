@@ -1,0 +1,12 @@
+{
+  "title": "Community Election 2026",
+  "question": "Rank the candidates in order of your preference (drag to reorder):",
+  "options": [
+    { "id": "Bhuvan",  "label": "Bhuvan J"  },
+    { "id": "Vihaan",    "label": "Vihaan B"       },
+    { "id": "Russhil",  "label": "Russhil H"  },
+    { "id": "##",  "label": "##"       }
+  ],
+  "receiverContact": "Send this to Bhuvan, the code",
+  "tokenSecret": "nevergonna"
+}
