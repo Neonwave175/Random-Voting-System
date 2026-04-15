@@ -7,11 +7,11 @@ An encrypted ranked-choice voting system. Voters get a standalone HTML ballot th
 
 ```
 ┌─────────────┐          ┌──────────────┐          ┌──────────────┐
-│  ballot.html │  vote   │   WhatsApp   │  paste   │  reader.js   │
-│  (offline)   │──code──>│   / SMS      │──code──> │  (organizer) │
-│              │         │   / Email    │          │              │
-│  Voter ranks │         │              │          │  Decrypts &  │
-│  candidates  │         │              │          │  tallies IRV │
+│  ballot.html│  vote    │   WhatsApp   │  paste   │  reader.js   │
+│  (offline)  │──code──> │   / SMS      │──code──> │  (organizer) │
+│             │          │   / Email    │          │              │
+│  Voter ranks│          │              │          │  Decrypts &  │
+│  candidates │          │              │          │  tallies IRV │
 └─────────────┘          └──────────────┘          └──────────────┘
 ```
 
