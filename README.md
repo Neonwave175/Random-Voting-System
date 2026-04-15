@@ -38,7 +38,7 @@ Edit `config.json`:
   "title": "Your Election Title",
   "question": "Rank the candidates in order of your preference (drag to reorder):",
   "options": [
-    { "id": "alice",  "label": "Alice Johnson" },
+    { "id": "Rick",  "label": "Rick Astley" },
     { "id": "bob",    "label": "Bob Smith" },
     { "id": "carol",  "label": "Carol Williams" }
   ],
