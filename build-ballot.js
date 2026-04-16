@@ -279,30 +279,30 @@ const html = /* html */`<!DOCTYPE html>
       margin-bottom: 14px;
     }
 
-    .candidates {
+    .options {
       list-style: none;
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 8px;
       margin-bottom: 6px;
     }
 
-    .candidate {
+    .option {
       display: flex;
       align-items: center;
-      gap: 12px;
-      padding: 14px 16px;
+      gap: 14px;
+      padding: 16px 18px;
       background: rgba(255, 255, 255, .04);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
       border: 1.5px solid rgba(148, 163, 184, .1);
       border-radius: 14px;
-      cursor: grab;
+      cursor: pointer;
       user-select: none;
-      transition: all .25s ease;
+      transition: all .2s ease;
       position: relative;
     }
-    .candidate::before {
+    .option::before {
       content: '';
       position: absolute;
       inset: 0;
@@ -310,58 +310,42 @@ const html = /* html */`<!DOCTYPE html>
       background: linear-gradient(135deg, rgba(255,255,255,.03), transparent);
       pointer-events: none;
     }
-    .candidate:hover {
+    .option:hover {
       background: rgba(99, 102, 241, .08);
       border-color: rgba(148, 163, 184, .2);
       box-shadow: 0 4px 20px rgba(0,0,0,.15);
       transform: translateY(-1px);
     }
-    .candidate:active { cursor: grabbing; }
-    .candidate.dragging {
-      opacity: .35;
-      border-color: rgba(99, 102, 241, .4);
-      background: rgba(99, 102, 241, .1);
+    .option.selected {
+      background: rgba(99, 102, 241, .18);
+      border-color: rgba(129, 140, 248, .6);
+      box-shadow: 0 0 0 3px rgba(99,102,241,.15), 0 6px 24px rgba(0,0,0,.2);
     }
-    .candidate.drag-over {
-      border-color: rgba(129, 140, 248, .5);
-      background: rgba(99, 102, 241, .12);
-      box-shadow: 0 0 0 4px rgba(99,102,241,.12), 0 8px 30px rgba(0,0,0,.2);
-      transform: scale(1.02);
-    }
+    .option.selected .radio-ring { border-color: #818cf8; }
+    .option.selected .radio-dot  { opacity: 1; transform: scale(1); }
 
-    .rank-badge {
-      width: 30px; height: 30px;
-      border-radius: 8px;
-      background: linear-gradient(135deg, rgba(99,102,241,.8), rgba(139,92,246,.8));
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      color: #fff;
-      font-weight: 700; font-size: .82rem;
+    .radio-ring {
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      border: 2px solid rgba(148, 163, 184, .35);
       display: flex; align-items: center; justify-content: center;
       flex-shrink: 0;
-      box-shadow: 0 2px 10px rgba(99,102,241,.35), inset 0 1px 0 rgba(255,255,255,.2);
+      transition: border-color .2s;
+    }
+    .radio-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #818cf8, #a78bfa);
+      opacity: 0;
+      transform: scale(0);
+      transition: all .2s cubic-bezier(.34,1.56,.64,1);
     }
 
-    .drag-handle {
-      color: #475569;
-      font-size: 1.2rem;
-      line-height: 1;
-      transition: color .2s;
-    }
-    .candidate:hover .drag-handle { color: #64748b; }
-
-    .cand-name {
+    .opt-name {
       font-weight: 500;
-      font-size: .95rem;
+      font-size: .98rem;
       flex: 1;
       color: #e2e8f0;
-    }
-
-    .hint {
-      font-size: .72rem;
-      color: #475569;
-      margin-bottom: 0;
-      padding-left: 2px;
     }
 
     /* ── Buttons ── */
@@ -580,8 +564,7 @@ const html = /* html */`<!DOCTYPE html>
 
     <div class="section" id="rankSection">
       <p class="ranking-label" id="question"></p>
-      <ul class="candidates" id="candidates" aria-label="Candidate ranking list"></ul>
-      <p class="hint">Drag to reorder &middot; #1 = your top choice</p>
+      <ul class="options" id="options" aria-label="Candidate options"></ul>
     </div>
 
     <button class="generate-btn" id="generateBtn">Generate Vote Code</button>
@@ -614,25 +597,6 @@ if (CONFIG.receiverContact) {
     '<strong>Next step:</strong>Send this code to the election organizer via WhatsApp, SMS, or email.'
 }
 
-const list = document.getElementById('candidates')
-
-function renderList(options) {
-  list.innerHTML = ''
-  options.forEach((opt, i) => {
-    const li = document.createElement('li')
-    li.className   = 'candidate'
-    li.draggable   = true
-    li.dataset.id  = opt.id
-    li.innerHTML   = \`
-      <span class="drag-handle" aria-hidden="true">&#8801;</span>
-      <span class="rank-badge">\${i + 1}</span>
-      <span class="cand-name">\${escHtml(opt.label)}</span>
-    \`
-    list.appendChild(li)
-  })
-  attachDrag()
-}
-
 function escHtml(str) {
   return String(str).replace(/[&<>"']/g, c =>
     ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c])
@@ -647,95 +611,35 @@ function setStep(n) {
     if (i < n) el.classList.add('done')
     else if (i === n) el.classList.add('active')
   }
-  const l1 = document.getElementById('line1')
-  const l2 = document.getElementById('line2')
-  l1.classList.toggle('filled', n > 1)
-  l2.classList.toggle('filled', n > 2)
+  document.getElementById('line1').classList.toggle('filled', n > 1)
+  document.getElementById('line2').classList.toggle('filled', n > 2)
 }
 
-// ── Drag & Drop (desktop) ──
-let dragSrc = null
+// ── Render options ──
+const optionsList = document.getElementById('options')
+let selectedId = null
 
-function attachDrag() {
-  list.querySelectorAll('.candidate').forEach(item => {
-    item.addEventListener('dragstart', e => {
-      dragSrc = item
-      item.classList.add('dragging')
-      e.dataTransfer.effectAllowed = 'move'
+CONFIG.options.forEach(opt => {
+  const li = document.createElement('li')
+  li.className  = 'option'
+  li.dataset.id = opt.id
+  li.setAttribute('role', 'radio')
+  li.setAttribute('aria-checked', 'false')
+  li.innerHTML = \`
+    <span class="radio-ring"><span class="radio-dot"></span></span>
+    <span class="opt-name">\${escHtml(opt.label)}</span>
+  \`
+  li.addEventListener('click', () => {
+    if (li.classList.contains('locked')) return
+    optionsList.querySelectorAll('.option').forEach(el => {
+      el.classList.remove('selected')
+      el.setAttribute('aria-checked', 'false')
     })
-    item.addEventListener('dragend', () => {
-      item.classList.remove('dragging')
-      list.querySelectorAll('.candidate').forEach(i => i.classList.remove('drag-over'))
-      updateBadges()
-    })
-    item.addEventListener('dragover', e => {
-      e.preventDefault()
-      if (item !== dragSrc) {
-        list.querySelectorAll('.candidate').forEach(i => i.classList.remove('drag-over'))
-        item.classList.add('drag-over')
-      }
-    })
-    item.addEventListener('drop', e => {
-      e.preventDefault()
-      if (dragSrc && item !== dragSrc) {
-        const all    = [...list.querySelectorAll('.candidate')]
-        const srcIdx = all.indexOf(dragSrc)
-        const dstIdx = all.indexOf(item)
-        if (srcIdx < dstIdx) list.insertBefore(dragSrc, item.nextSibling)
-        else                  list.insertBefore(dragSrc, item)
-        item.classList.remove('drag-over')
-      }
-    })
+    li.classList.add('selected')
+    li.setAttribute('aria-checked', 'true')
+    selectedId = opt.id
   })
-}
-
-function updateBadges() {
-  list.querySelectorAll('.candidate').forEach((item, i) => {
-    item.querySelector('.rank-badge').textContent = i + 1
-  })
-}
-
-// ── Touch drag (mobile) ──
-let touchEl = null, touchClone = null, touchOffY = 0
-
-list.addEventListener('touchstart', e => {
-  const li = e.target.closest('.candidate')
-  if (!li) return
-  touchEl = li
-  const rect  = li.getBoundingClientRect()
-  touchOffY   = e.touches[0].clientY - rect.top
-  touchClone  = li.cloneNode(true)
-  touchClone.style.cssText = \`position:fixed;opacity:.65;pointer-events:none;width:\${rect.width}px;z-index:9999;left:\${rect.left}px\`
-  document.body.appendChild(touchClone)
-}, { passive: true })
-
-list.addEventListener('touchmove', e => {
-  if (!touchEl) return
-  e.preventDefault()
-  const y = e.touches[0].clientY
-  touchClone.style.top = (y - touchOffY) + 'px'
-  const els    = document.elementsFromPoint(e.touches[0].clientX, y)
-  const target = els.find(el => el.classList.contains('candidate') && el !== touchEl)
-  list.querySelectorAll('.candidate').forEach(i => i.classList.remove('drag-over'))
-  if (target) target.classList.add('drag-over')
-}, { passive: false })
-
-list.addEventListener('touchend', e => {
-  if (!touchEl) return
-  touchClone?.remove(); touchClone = null
-  const y      = e.changedTouches[0].clientY
-  const els    = document.elementsFromPoint(e.changedTouches[0].clientX, y)
-  const target = els.find(el => el.classList.contains('candidate') && el !== touchEl)
-  if (target) {
-    const all    = [...list.querySelectorAll('.candidate')]
-    const srcIdx = all.indexOf(touchEl)
-    const dstIdx = all.indexOf(target)
-    if (srcIdx < dstIdx) list.insertBefore(touchEl, target.nextSibling)
-    else                  list.insertBefore(touchEl, target)
-  }
-  list.querySelectorAll('.candidate').forEach(i => i.classList.remove('drag-over'))
-  updateBadges()
-  touchEl = null
+  optionsList.appendChild(li)
 })
 
 // ── Crypto ──
@@ -746,13 +650,13 @@ function bufToBase64(buf) {
   return btoa(binary)
 }
 
-async function encryptPayload(token, rankings) {
+async function encryptPayload(token, choice) {
   const key = await crypto.subtle.importKey(
     'jwk', CONFIG.publicKey,
     { name: 'RSA-OAEP', hash: 'SHA-256' },
     false, ['encrypt']
   )
-  const payload    = JSON.stringify({ token, rankings })
+  const payload    = JSON.stringify({ token, choice })
   const plaintext  = new TextEncoder().encode(payload)
   const ciphertext = await crypto.subtle.encrypt({ name: 'RSA-OAEP' }, key, plaintext)
   return bufToBase64(ciphertext)
@@ -760,9 +664,9 @@ async function encryptPayload(token, rankings) {
 
 // ── Generate ──
 document.getElementById('generateBtn').addEventListener('click', async () => {
-  const token  = document.getElementById('token').value.trim()
-  const errEl  = document.getElementById('errorMsg')
-  const btn    = document.getElementById('generateBtn')
+  const token = document.getElementById('token').value.trim()
+  const errEl = document.getElementById('errorMsg')
+  const btn   = document.getElementById('generateBtn')
 
   errEl.className = 'error-msg'
 
@@ -772,14 +676,17 @@ document.getElementById('generateBtn').addEventListener('click', async () => {
     return
   }
 
-  const items    = [...list.querySelectorAll('.candidate')]
-  const rankings = items.map((item, i) => ({ id: item.dataset.id, rank: i + 1 }))
+  if (!selectedId) {
+    errEl.textContent = 'Please select a candidate.'
+    errEl.className   = 'error-msg visible'
+    return
+  }
 
   btn.disabled    = true
   btn.textContent = 'Encrypting...'
 
   try {
-    const code = await encryptPayload(token, rankings)
+    const code = await encryptPayload(token, selectedId)
 
     document.getElementById('codeArea').value = code
     document.getElementById('codeBox').classList.add('visible')
@@ -789,10 +696,7 @@ document.getElementById('generateBtn').addEventListener('click', async () => {
     document.getElementById('token').disabled = true
     document.getElementById('tokenSection').classList.add('disabled')
     document.getElementById('rankSection').classList.add('disabled')
-    list.querySelectorAll('.candidate').forEach(el => {
-      el.draggable = false
-      el.style.cursor = 'default'
-    })
+    optionsList.querySelectorAll('.option').forEach(el => el.classList.add('locked'))
 
     setStep(3)
   } catch (err) {
@@ -810,7 +714,7 @@ document.getElementById('copyBtn').addEventListener('click', async () => {
   try {
     await navigator.clipboard.writeText(code)
     copyBtn.textContent = 'Copied!'
-    copyBtn.style.background = '#15803d'
+    copyBtn.style.background = 'rgba(22,163,74,.7)'
     setTimeout(() => {
       copyBtn.textContent = 'Copy Vote Code'
       copyBtn.style.background = ''
@@ -820,9 +724,6 @@ document.getElementById('copyBtn').addEventListener('click', async () => {
     copyBtn.textContent = 'Select the text above and copy manually'
   }
 })
-
-// ── Init ──
-renderList(CONFIG.options)
 </script>
 </body>
 </html>`
