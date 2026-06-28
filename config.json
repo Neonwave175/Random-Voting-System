@@ -2,10 +2,10 @@
   "title": "Community Election 2026",
   "question": "Select your preferred candidate:",
   "options": [
-    { "id": "Bhuvan",  "label": "Bhuvan J"  },
-    { "id": "Vihaan",    "label": "Vihaan B"       },
-    { "id": "Russhil",  "label": "Russhil H"  },
-    { "id": "##",  "label": "##"       }
+    { "id": "Rick",  "label": "Rick Astley"  },
+    { "id": "Albert",    "label": "Albert Einstin"       },
+    { "id": "Steve",  "label": "Steve Jobs"  },
+    { "id": "Kelly",  "label": "Kelly Johnson"       }
   ],
   "receiverContact": "Send this to Bhuvan, the code",
   "tokenSecret": "nevergonna"
